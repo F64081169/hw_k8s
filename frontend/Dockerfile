@@ -1,27 +1,21 @@
-FROM docker.io/library/node:21-alpine3.18 AS BUILDER
-
-WORKDIR /frontend
-
-COPY package.json ./
-COPY package-lock.json ./
-COPY src/ ./src/
-COPY tsconfig.json ./
-COPY tsconfig.node.json ./
-
-
-RUN npm ci
-RUN npm install
-
+# Use the official Node.js 21 image
+# FROM node:21
 FROM docker.io/library/node:21-alpine3.18 AS RUNNER
 
-EXPOSE 80
-
+# Set the working directory in the container
 WORKDIR /frontend
 
-COPY package.json ./
-COPY package-lock.json ./
-COPY --from=BUILDER /frontend/dist ./dist/
+# Copy the package.json and package-lock.json files
+COPY package*.json ./
 
-RUN npm ci --only=production
+# Install dependencies
+RUN npm install
 
-CMD ["npm", "run", "dev"]
+# Copy the rest of the application code
+COPY . .
+
+# Expose port 5173
+EXPOSE 5173
+
+# Command to run the application
+CMD ["npm", "run", "dev", "--", "--host"]
