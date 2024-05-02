@@ -1,21 +1,39 @@
-# Use the official Node.js 21 image
-# FROM node:21
-FROM docker.io/library/node:21-alpine3.18 AS RUNNER
+FROM docker.io/library/node:21-alpine3.18 AS BUILDER
 
-# Set the working directory in the container
 WORKDIR /backend
 
-# Copy the package.json and package-lock.json files
-COPY package*.json ./
+COPY package.json ./
+COPY package-lock.json ./
+COPY src ./src
+COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm install
+# ci ~= install all
+RUN npm ci
+RUN npm run build
 
-# Copy the rest of the application code
-COPY . .
+# multistage dockerfile
+FROM docker.io/library/node:21-alpine3.18 AS RUNNER
 
-# Expose port 8888
 EXPOSE 8888
 
-# Command to run the application
-CMD ["npm", "run", "dev", "--", "--host"]
+WORKDIR /backend
+
+COPY package.json ./
+COPY package-lock.json ./
+
+# Copy from previous stage
+COPY --from=BUILDER /backend/dist ./
+
+# docker run -d -p 27017:27017 mongo
+# Install package without dev 
+# Less 
+RUN npm ci
+#--omit=dev
+ENV PORT=8888
+ENV HOST=0.0.0.0
+# docker inspect mongodb | grep IPAddress
+ENV MONGO_CONNECTION_STRING=mongodb://db:27017/myMernApp
+
+#CMD ["env"]
+#CMD ["ls", "types"]
+CMD [ "node", "/backend/index.js"]
