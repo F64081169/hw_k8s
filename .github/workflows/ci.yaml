@@ -13,7 +13,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '16'  # 更新 Node.js 版本
+        node-version: '16'
 
     - name: Install dependencies
       run: npm install
@@ -45,9 +45,22 @@ jobs:
     - name: Commit formatted code
       if: failure()
       env:
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # 使用 PAT 來推送更改
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git commit -am "style: auto format code"
         git push
+
+    - name: Check coverage difference
+      run: |
+        COVERAGE_DIFF=$(diff -u <(head -n 1 ./backend/coverage/coverage-summary.json) <(tail -n 1 ./backend/coverage/coverage-summary.json) | grep '^-' | wc -l)
+        if [ "$COVERAGE_DIFF" -gt 0 ]; then
+          echo "Coverage decreased. Failing the job."
+          exit 1
+        else
+          echo "Coverage is sufficient. Job succeeded."
+        fi
+
+    - name: Cleanup
+      run: echo "Cleaning up..."
