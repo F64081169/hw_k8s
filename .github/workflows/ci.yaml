@@ -20,11 +20,9 @@ jobs:
       working-directory: ./backend
 
     - name: Run tests
-      run: npm run test
-      working-directory: ./backend
-
-    - name: Generate test coverage
-      run: npm run coverage
+      run: |
+        npm run test
+        npm run coverage > coverage.txt
       working-directory: ./backend
 
     - name: Upload coverage report
@@ -61,7 +59,7 @@ jobs:
         else
           BASE_COVERAGE=0
         fi
-        CURRENT_COVERAGE=$(jq '.total.lines.pct' ./backend/coverage/coverage-summary.json)
+        CURRENT_COVERAGE=$(grep 'All files' coverage.txt | awk '{print $5}' | tr -d '%')
         echo "Base coverage: $BASE_COVERAGE%"
         echo "Current coverage: $CURRENT_COVERAGE%"
         if (( $(echo "$CURRENT_COVERAGE < $BASE_COVERAGE" | bc -l) )); then
