@@ -71,6 +71,7 @@ jobs:
           echo "Coverage is sufficient. Saving new base coverage."
           echo "$CURRENT_COVERAGE" > ./backend/coverage/base-coverage.txt
         fi
+      working-directory: ./backend
 
     - name: Cleanup
       run: echo "Cleaning up..."
