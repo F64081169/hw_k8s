@@ -54,12 +54,17 @@ jobs:
 
     - name: Check coverage difference
       run: |
-        COVERAGE_DIFF=$(diff -u <(head -n 1 ./backend/coverage/coverage-summary.json) <(tail -n 1 ./backend/coverage/coverage-summary.json) | grep '^-' | wc -l)
-        if [ "$COVERAGE_DIFF" -gt 0 ]; then
+        echo "Comparing coverage..."
+        BASE_COVERAGE=$(cat ./backend/coverage/base-coverage.txt || echo "0")
+        CURRENT_COVERAGE=$(jq '.total.lines.pct' ./backend/coverage/coverage-summary.json)
+        echo "Base coverage: $BASE_COVERAGE%"
+        echo "Current coverage: $CURRENT_COVERAGE%"
+        if (( $(echo "$CURRENT_COVERAGE < $BASE_COVERAGE" | bc -l) )); then
           echo "Coverage decreased. Failing the job."
           exit 1
         else
-          echo "Coverage is sufficient. Job succeeded."
+          echo "Coverage is sufficient. Saving new base coverage."
+          echo "$CURRENT_COVERAGE" > ./backend/coverage/base-coverage.txt
         fi
 
     - name: Cleanup
