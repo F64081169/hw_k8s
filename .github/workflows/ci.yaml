@@ -19,17 +19,24 @@ jobs:
       run: npm install
       working-directory: ./backend
 
+    - name: Download previous coverage report
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        name: coverage-report
+        workflow: ci.yaml
+        path: ./backend/coverage/
+
     - name: Run tests
       run: |
         npm run test
-        npm run coverage > coverage.txt
+        npm run coverage > ./backend/coverage/coverage.txt
       working-directory: ./backend
 
-    - name: Upload coverage report
+    - name: Upload current coverage report
       uses: actions/upload-artifact@v2
       with:
         name: coverage-report
-        path: ./backend/coverage
+        path: ./backend/coverage/coverage.txt
 
     - name: Check code formatting
       id: format-check
@@ -54,12 +61,12 @@ jobs:
     - name: Check coverage difference
       run: |
         echo "Comparing coverage..."
-        if [ -f "./backend/coverage/base-coverage.txt" ]; then
-          BASE_COVERAGE=$(cat ./backend/coverage/base-coverage.txt)
+        if [ -f "./backend/coverage/coverage.txt" ]; then
+          BASE_COVERAGE=$(cat ./backend/coverage/coverage.txt)
         else
           BASE_COVERAGE=0
         fi
-        CURRENT_COVERAGE=$(grep 'All files' coverage.txt | awk '{print $5}' | tr -d '%')
+        CURRENT_COVERAGE=$(grep 'All files' ./backend/coverage/coverage.txt | awk '{print $5}' | tr -d '%')
         echo "Base coverage: $BASE_COVERAGE%"
         echo "Current coverage: $CURRENT_COVERAGE%"
         if (( $(echo "$CURRENT_COVERAGE < $BASE_COVERAGE" | bc -l) )); then
@@ -67,8 +74,7 @@ jobs:
           exit 1
         else
           echo "Coverage is sufficient. Saving new base coverage."
-          echo "$CURRENT_COVERAGE" > ./backend/coverage/base-coverage.txt
-        fi
+          echo "$CURRENT_COVERAGE" > ./backend/coverage/coverage.txt
       working-directory: ./backend
 
     - name: Cleanup
