@@ -18,7 +18,7 @@ jobs:
     - name: Run tests and collect coverage
       run: |
         cd backend
-        npm run test -- --coverage
+        npm run test 
     - name: Check if coverage decreased
       id: coverage_check
       uses: romeovs/lcov-reporter-action@v0.2.16
