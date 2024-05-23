@@ -13,22 +13,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@master
-      with:
-        version: 'latest'
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-
-    - name: Configure Docker
-      run: gcloud auth configure-docker
-
-    - name: Build Docker image
-      run: docker-compose build
-
-    - name: Push Docker image
-      run: docker-compose push
-
     - name: Deploy to GCP
       run: |
         kubectl apply -f k8s/deploys.yaml

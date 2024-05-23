@@ -6,7 +6,7 @@ export const getTodos = async (): Promise<AxiosResponse<TodoResponse>> => {
     const res = await axios.get<TodoResponse>(`/api/v1/todos`)
     return Promise.resolve(res)
   } catch (error) {
-        return Promise.reject(`GET /todos ERROR: ${error}`)
+    return Promise.reject(`GET /todos ERROR: ${error}`)
   }
 }
 
