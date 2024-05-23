@@ -13,43 +13,37 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '18'
- 
+        node-version: '16'
+
     - name: Install dependencies
       run: npm install
       working-directory: ./backend
 
-    - name: Download previous coverage report
-      uses: dawidd6/action-download-artifact@v2
-      with:
-        name: coverage-report
-        workflow: ci.yaml
-        path: ./backend/coverage/
-
     - name: Run tests
-      run: |
-        npm run test
-        npm run coverage > ./backend/coverage/coverage.txt
+      run: npm run test
       working-directory: ./backend
 
-    - name: Upload current coverage report
+    - name: Generate test coverage
+      run: npm run coverage
+      working-directory: ./backend
+
+    - name: Upload coverage report
       uses: actions/upload-artifact@v2
       with:
         name: coverage-report
-        path: ./backend/coverage/coverage.txt
+        path: ./backend/coverage
 
     - name: Check code formatting
-      id: format-check
       run: npm run format:check
       working-directory: ./backend
 
     - name: Format code
-      if: steps.format-check.outcome == 'failure'
+      if: failure()
       run: npm run format
       working-directory: ./backend
 
     - name: Commit formatted code
-      if: steps.format-check.outcome == 'failure'
+      if: failure()
       env:
         GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
@@ -60,22 +54,13 @@ jobs:
 
     - name: Check coverage difference
       run: |
-        echo "Comparing coverage..."
-        if [ -f "./backend/coverage/coverage.txt" ]; then
-          BASE_COVERAGE=$(cat ./backend/coverage/coverage.txt)
-        else
-          BASE_COVERAGE=0
-        fi
-        CURRENT_COVERAGE=$(grep 'All files' ./backend/coverage/coverage.txt | awk '{print $5}' | tr -d '%')
-        echo "Base coverage: $BASE_COVERAGE%"
-        echo "Current coverage: $CURRENT_COVERAGE%"
-        if (( $(echo "$CURRENT_COVERAGE < $BASE_COVERAGE" | bc -l) )); then
+        COVERAGE_DIFF=$(diff -u <(head -n 1 ./backend/coverage/coverage-summary.json) <(tail -n 1 ./backend/coverage/coverage-summary.json) | grep '^-' | wc -l)
+        if [ "$COVERAGE_DIFF" -gt 0 ]; then
           echo "Coverage decreased. Failing the job."
           exit 1
         else
-          echo "Coverage is sufficient. Saving new base coverage."
-          echo "$CURRENT_COVERAGE" > ./backend/coverage/coverage.txt
-      working-directory: ./backend
+          echo "Coverage is sufficient. Job succeeded."
+        fi
 
     - name: Cleanup
       run: echo "Cleaning up..."
