@@ -31,7 +31,28 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: coverage-report
-        path: ./backend/coverage
+        path: ./backend/coverage/coverage-final.json
+
+    - name: Download previous coverage report
+      uses: actions/download-artifact@v2
+      with:
+        name: coverage-report
+        path: ./backend/coverage/previous
+
+    - name: Compare coverage reports
+      run: |
+        # Install jq to parse JSON
+        sudo apt-get install jq
+        CURRENT_COVERAGE=$(jq '.total.lines.pct' ./backend/coverage/coverage-final.json)
+        PREVIOUS_COVERAGE=$(jq '.total.lines.pct' ./backend/coverage/previous/coverage-final.json)
+        echo "Current Coverage: $CURRENT_COVERAGE%"
+        echo "Previous Coverage: $PREVIOUS_COVERAGE%"
+        if [ "$CURRENT_COVERAGE" -lt "$PREVIOUS_COVERAGE" ]; then
+          echo "Coverage decreased. Failing the job."
+          exit 1
+        else
+          echo "Coverage is sufficient. Job succeeded."
+        fi
 
     - name: Check code formatting
       run: npm run format:check
@@ -51,16 +72,6 @@ jobs:
         git config --local user.name "github-actions[bot]"
         git commit -am "style: auto format code"
         git push
-
-    - name: Check coverage difference
-      run: |
-        COVERAGE_DIFF=$(diff -u <(head -n 1 ./backend/coverage/coverage-summary.json) <(tail -n 1 ./backend/coverage/coverage-summary.json) | grep '^-' | wc -l)
-        if [ "$COVERAGE_DIFF" -gt 0 ]; then
-          echo "Coverage decreased. Failing the job."
-          exit 1
-        else
-          echo "Coverage is sufficient. Job succeeded."
-        fi
 
     - name: Cleanup
       run: echo "Cleaning up..."
