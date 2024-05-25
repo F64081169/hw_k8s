@@ -1,7 +1,7 @@
 import fastify, { FastifyInstance, FastifyListenOptions } from 'fastify'
 import { AppConfig } from './types/config'
 import { establishConnection } from './plugins/mongodb'
-import { TodoRouter } from './routes/todo'
+             import { TodoRouter } from './routes/todo'
 
 export const serverOf: () => FastifyInstance = () => {
   const server = fastify()

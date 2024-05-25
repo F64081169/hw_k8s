@@ -116,14 +116,14 @@ jobs:
 
     - name: Format code in ./backend
       run: |
-        npx prettier --check "./backend/**/*.js"
+        npx prettier --check "./backend/**/*.{js,ts}"
         if [ $? -eq 0 ]; then
           echo "No files need formatting."
         else
           echo "Files are formatting..."
-          npx prettier --write "./backend/**/*.js"
+          npx prettier --write "./backend/**/*.{js,ts}"
           echo "Differences found. Need to commit."
-          git add ./backend/**/*.js
+          git add ./backend/**/*.{js,ts}
           git commit -m "Formatted code with Prettier"
           git push origin main
         fi
