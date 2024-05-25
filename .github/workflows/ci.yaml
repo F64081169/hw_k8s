@@ -123,6 +123,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git add ./backend/src/**/*.ts ./frontend/src/**/*.ts
+          git add ./backend/package-lock.json ./backend/package.json
           git commit -m "Formatted code with Prettier"
           git push origin main
         )
