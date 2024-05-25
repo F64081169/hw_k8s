@@ -115,6 +115,8 @@ jobs:
       working-directory: ./backend
 
     - name: Check and format code
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         npx prettier --check "./backend/src/**/*.ts" "./frontend/src/**/*.ts" || (
           echo "Files are formatting..."
@@ -125,5 +127,5 @@ jobs:
           git add ./backend/src/**/*.ts ./frontend/src/**/*.ts
           git add ./backend/package-lock.json ./backend/package.json
           git commit -m "Formatted code with Prettier"
-          git push origin feat/CICD
+          git push "https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:feat/CICD
         )
