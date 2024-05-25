@@ -109,20 +109,20 @@ jobs:
       run: |
         echo $GITHUB_SHA
         git reset --hard $GITHUB_SHA
-    - name: Set up Formatting tools
+    - name: Install Prettier
       run: npm install --save-dev prettier
+      working-directory: ./backend
 
-    - name: Format code in ./backend
+     - name: Format code in ./backend
       run: |
-        prettier --check your-directory/**/*.js
-        # prettier --list-different ./backend
+        npx prettier --check "./backend/**/*.js"
         if [ $? -eq 0 ]; then
           echo "No files need formatting."
         else
           echo "Files are formatting..."
-          prettier --write ./backend
+          npx prettier --write "./backend/**/*.js"
           echo "Differences found. Need to commit."
-          git add yourfile.js
+          git add ./backend/**/*.js
           git commit -m "Formatted code with Prettier"
           git push origin main
         fi
