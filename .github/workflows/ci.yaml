@@ -114,16 +114,16 @@ jobs:
       run: npm install --save-dev prettier
       working-directory: ./backend
 
-    - name: Format code in ./backend
+    - name: Format code in specified directories
       run: |
-        npx prettier --check "./backend/**/*.{js,ts}"
+        npx prettier --check "./backend/src/**/*.ts" "./frontend/src/**/*.ts"
         if [ $? -eq 0 ]; then
           echo "No files need formatting."
         else
           echo "Files are formatting..."
-          npx prettier --write "./backend/**/*.{js,ts}"
+          npx prettier --write "./backend/src/**/*.ts" "./frontend/src/**/*.ts"
           echo "Differences found. Need to commit."
-          git add ./backend/**/*.{js,ts}
+          git add ./backend/src/**/*.ts ./frontend/src/**/*.ts
           git commit -m "Formatted code with Prettier"
           git push origin main
         fi
