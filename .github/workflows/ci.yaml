@@ -127,5 +127,5 @@ jobs:
           git add ./backend/src/**/*.ts ./frontend/src/**/*.ts
           git add ./backend/package-lock.json ./backend/package.json
           git commit -m "Formatted code with Prettier"
-          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:feat/deploy
+          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" 
         )
