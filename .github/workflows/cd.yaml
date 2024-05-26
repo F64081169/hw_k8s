@@ -1,4 +1,4 @@
-name: CD Pipeline
+name: CD
 
 on:
   push:
@@ -26,6 +26,28 @@ jobs:
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         chmod +x kubectl
         sudo mv kubectl /usr/local/bin/
+
+    - name: Install dependencies - backend
+      run: npm install
+      working-directory: ./backend
+
+    - name: Install dependencies - frontend
+      run: npm install
+      working-directory: ./frontend
+
+    - name: Build & Push latest image - backend
+      run: |
+        docker build -t ghcr.io/chingching17/backend:${GITHUB_SHA} .
+        echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u USERNAME --password-stdin
+        docker push ghcr.io/chingching17/backend:${GITHUB_SHA}
+      working-directory: ./backend
+
+    - name: Build & Push latest image - frontend
+      run: |
+        docker build -t ghcr.io/chingching17/frontend:${GITHUB_SHA} .
+        echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u USERNAME --password-stdin
+        docker push ghcr.io/chingching17/frontend:${GITHUB_SHA}
+      working-directory: ./frontend
 
     - name: Deploy to GKE
       run: |
