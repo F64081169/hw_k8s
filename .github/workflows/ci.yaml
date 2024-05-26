@@ -110,18 +110,18 @@ jobs:
         echo $GITHUB_SHA
         git reset --hard $GITHUB_SHA
 
-    - name: Install Prettier
+    - name: Set up Formatting tools
       run: npm install --save-dev prettier
-      working-directory: ./backend
 
     - name: Check and format code
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         npx prettier --check "./backend/src/**/*.ts" "./frontend/src/**/*.ts" || (
-          echo "Files are formatting..."
+          echo "Unformat files are found. Files are formatting..."
           npx prettier --write "./backend/src/**/*.ts" "./frontend/src/**/*.ts"
-          echo "Differences found. Need to commit."
+          
+          echo "Formatting done. Committing changes..."
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git add ./backend/src/**/*.ts ./frontend/src/**/*.ts
